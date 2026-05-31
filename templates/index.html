@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Yoga Posture Evaluator</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <i class="fas fa-yoga"></i>
+                <span>YogaAI</span>
+            </div>
+            <ul class="nav-menu">
+                <li class="nav-item">
+                    <a href="#home" class="nav-link active">Home</a>
+                </li>
+                <li class="nav-item">
+                    <a href="#camera" class="nav-link">Evaluation</a>
+                </li>
+                <li class="nav-item">
+                    <a href="#poses" class="nav-link">Poses</a>
+                </li>
+                <li class="nav-item">
+                    <a href="#stats" class="nav-link">Statistics</a>
+                </li>
+                <li class="nav-item">
+                    <button id="themeToggle" class="theme-toggle">
+                        <i class="fas fa-moon"></i>
+                    </button>
+                </li>
+            </ul>
+            <div class="hamburger">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section id="home" class="hero">
+        <div class="hero-content">
+            <h1>AI Yoga Posture Evaluator</h1>
+            <p>Perfect Your Yoga Practice with Real-Time AI Analysis</p>
+            <div class="hero-buttons">
+                <button class="btn btn-primary" onclick="scrollToSection('#camera')">
+                    <i class="fas fa-video"></i> Live Evaluation
+                </button>
+                <button class="btn btn-secondary" onclick="scrollToSection('#upload')">
+                    <i class="fas fa-image"></i> Upload Image
+                </button>
+                <button class="btn btn-secondary" onclick="scrollToSection('#poses')">
+                    <i class="fas fa-list"></i> Browse Poses
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Content -->
+    <div class="container">
+        <!-- Image Upload Section -->
+        <section id="upload" class="upload-section">
+            <div class="section-title">
+                <h2>Upload Yoga Pose Image</h2>
+                <p>Analyze your yoga posture from a photo</p>
+            </div>
+
+            <div class="upload-container">
+                <div class="upload-area" id="uploadArea">
+                    <div class="upload-icon">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                    </div>
+                    <p class="upload-text">Drag and drop your image here</p>
+                    <p class="upload-subtext">or</p>
+                    <input type="file" id="imageInput" accept=".jpg,.jpeg,.png" style="display: none;">
+                    <button class="btn btn-primary" onclick="document.getElementById('imageInput').click()">
+                        <i class="fas fa-folder-open"></i> Select Image
+                    </button>
+                    <p class="upload-formats">Supported: JPG, PNG, JPEG</p>
+                </div>
+
+                <!-- Image Preview -->
+                <div id="previewContainer" class="preview-container hidden">
+                    <div class="preview-card">
+                        <img id="previewImage" src="" alt="Preview" class="preview-image">
+                        <div class="preview-actions">
+                            <button class="btn btn-success" id="analyzeBtn" onclick="analyzeImage()">
+                                <i class="fas fa-magic"></i> Analyze Pose
+                            </button>
+                            <button class="btn btn-danger" onclick="resetUpload()">
+                                <i class="fas fa-times"></i> Clear
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Analysis Results -->
+            <div id="resultsContainer" class="results-container hidden">
+                <div class="section-title">
+                    <h2>Analysis Results</h2>
+                </div>
+
+                <div class="results-grid">
+                    <!-- Original Image -->
+                    <div class="result-card">
+                        <h3>Original Image</h3>
+                        <img id="resultOriginal" src="" alt="Original" class="result-image">
+                    </div>
+
+                    <!-- Skeleton Overlay -->
+                    <div class="result-card">
+                        <h3>Pose Detection</h3>
+                        <img id="resultSkeleton" src="" alt="Skeleton" class="result-image">
+                    </div>
+                </div>
+
+                <!-- Accuracy and Feedback -->
+                <div class="analysis-results">
+                    <div class="analysis-card accuracy-card">
+                        <div class="card-header">
+                            <i class="fas fa-chart-pie"></i>
+                            <h3>Accuracy Score</h3>
+                        </div>
+                        <div class="accuracy-display">
+                            <div class="accuracy-circle">
+                                <svg viewBox="0 0 100 100">
+                                    <circle cx="50" cy="50" r="45" class="circle-bg"></circle>
+                                    <circle cx="50" cy="50" r="45" class="circle-progress" id="resultAccuracyCircle"></circle>
+                                </svg>
+                                <div class="accuracy-text">
+                                    <span id="resultAccuracy">0</span>
+                                    <span class="accuracy-label">%</span>
+                                </div>
+                            </div>
+                        </div>
+                        <p id="resultAccuracyStatus" class="status-text">Analyzing...</p>
+                    </div>
+
+                    <div class="analysis-card feedback-card">
+                        <div class="card-header">
+                            <i class="fas fa-lightbulb"></i>
+                            <h3>Feedback & Suggestions</h3>
+                        </div>
+                        <div id="resultFeedback" class="feedback-list">
+                            <p class="placeholder">Analyzing...</p>
+                        </div>
+                    </div>
+
+                    <div class="analysis-card status-card">
+                        <div class="card-header">
+                            <i class="fas fa-info-circle"></i>
+                            <h3>Detected Pose</h3>
+                        </div>
+                        <div id="detectedPoseInfo" class="pose-info">
+                            <p class="placeholder">Analyzing...</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="results-actions">
+                    <button class="btn btn-primary" onclick="resetUpload()">
+                        <i class="fas fa-upload"></i> Analyze Another Image
+                    </button>
+                </div>
+            </div>
+        </section>
+        <!-- Camera Section -->
+        <section id="camera" class="camera-section">
+            <div class="section-title">
+                <h2>Live Pose Evaluation</h2>
+                <p>Position yourself in front of the camera</p>
+            </div>
+
+            <div class="camera-wrapper">
+                <div class="camera-container">
+                    <img id="videoFeed" src="/video_feed" alt="Video Feed" class="video-stream">
+                    <div class="camera-overlay">
+                        <div class="pulse-indicator">
+                            <span></span>
+                        </div>
+                        <p id="cameraStatus">Initializing...</p>
+                    </div>
+                </div>
+
+                <!-- Control Panel -->
+                <div class="control-panel">
+                    <div class="control-group">
+                        <label for="poseSelect">Select Pose:</label>
+                        <select id="poseSelect" class="control-input">
+                            <option value="mountain_pose">Mountain Pose</option>
+                            <option value="tree_pose">Tree Pose</option>
+                            <option value="warrior_pose">Warrior Pose</option>
+                            <option value="t_pose">T Pose</option>
+                        </select>
+                    </div>
+
+                    <div class="button-group">
+                        <button id="startBtn" class="btn btn-success" onclick="startSession()">
+                            <i class="fas fa-play"></i> Start
+                        </button>
+                        <button id="stopBtn" class="btn btn-danger" onclick="stopSession()" disabled>
+                            <i class="fas fa-stop"></i> Stop
+                        </button>
+                        <button class="btn btn-info" onclick="resetSession()">
+                            <i class="fas fa-redo"></i> Reset
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Feedback & Analysis Section -->
+        <section class="analysis-section">
+            <div class="analysis-grid">
+                <!-- Accuracy Card -->
+                <div class="analysis-card accuracy-card">
+                    <div class="card-header">
+                        <i class="fas fa-chart-pie"></i>
+                        <h3>Accuracy</h3>
+                    </div>
+                    <div class="accuracy-display">
+                        <div class="accuracy-circle">
+                            <svg viewBox="0 0 100 100">
+                                <circle cx="50" cy="50" r="45" class="circle-bg"></circle>
+                                <circle cx="50" cy="50" r="45" class="circle-progress" id="accuracyCircle"></circle>
+                            </svg>
+                            <div class="accuracy-text">
+                                <span id="accuracyPercent">0</span>
+                                <span class="accuracy-label">%</span>
+                            </div>
+                        </div>
+                    </div>
+                    <p id="accuracyStatus" class="status-text">No pose detected</p>
+                </div>
+
+                <!-- Real-time Feedback Card -->
+                <div class="analysis-card feedback-card">
+                    <div class="card-header">
+                        <i class="fas fa-lightbulb"></i>
+                        <h3>Real-Time Feedback</h3>
+                    </div>
+                    <div id="feedbackList" class="feedback-list">
+                        <p class="placeholder">Waiting for pose detection...</p>
+                    </div>
+                </div>
+
+                <!-- Pose Status Card -->
+                <div class="analysis-card status-card">
+                    <div class="card-header">
+                        <i class="fas fa-check-circle"></i>
+                        <h3>Pose Status</h3>
+                    </div>
+                    <div id="poseStatus" class="pose-status">
+                        <p class="placeholder">Initializing...</p>
+                    </div>
+                    <div id="angleDetails" class="angle-details">
+                        <!-- Angle details will be populated here -->
+                    </div>
+                </div>
+
+                <!-- Session Timer Card -->
+                <div class="analysis-card timer-card">
+                    <div class="card-header">
+                        <i class="fas fa-clock"></i>
+                        <h3>Session Timer</h3>
+                    </div>
+                    <div id="timerDisplay" class="timer-display">
+                        <span class="timer-value">00:00</span>
+                    </div>
+                    <p id="sessionInfo" class="session-info">No active session</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Poses Reference Section -->
+        <section id="poses" class="poses-section">
+            <div class="section-title">
+                <h2>Yoga Poses Reference</h2>
+                <p>Learn about each yoga pose with detailed descriptions</p>
+            </div>
+
+            <div id="posesContainer" class="poses-grid">
+                <!-- Poses will be populated here -->
+            </div>
+        </section>
+
+        <!-- Statistics Section -->
+        <section id="stats" class="stats-section">
+            <div class="section-title">
+                <h2>Your Statistics</h2>
+                <p>Track your yoga progress</p>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-video"></i>
+                    </div>
+                    <div class="stat-content">
+                        <p class="stat-label">Total Sessions</p>
+                        <p id="totalSessions" class="stat-value">0</p>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <div class="stat-content">
+                        <p class="stat-label">Total Time</p>
+                        <p id="totalTime" class="stat-value">0h 0m</p>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-star"></i>
+                    </div>
+                    <div class="stat-content">
+                        <p class="stat-label">Best Accuracy</p>
+                        <p id="bestAccuracy" class="stat-value">0%</p>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-check"></i>
+                    </div>
+                    <div class="stat-content">
+                        <p class="stat-label">Success Rate</p>
+                        <p id="successRate" class="stat-value">0%</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="history-container">
+                <h3>Session History</h3>
+                <div id="historyList" class="history-list">
+                    <p class="placeholder">No sessions recorded yet</p>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <p>&copy; 2026 AI Yoga Posture Evaluator. All rights reserved.</p>
+            <p>Built with <i class="fas fa-heart"></i> using MediaPipe, OpenCV, and Flask</p>
+        </div>
+    </footer>
+
+    <!-- Loading Spinner -->
+    <div id="loadingSpinner" class="loading-spinner hidden">
+        <div class="spinner"></div>
+        <p>Processing...</p>
+    </div>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
