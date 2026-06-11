@@ -371,3 +371,6 @@ For issues, suggestions, or contributions, please create an issue or pull reques
 Perfect your poses with real-time AI feedback. Start your journey to better posture today!
 
 **Remember**: Consistency is key. Practice regularly for best results! 🧘‍♀️💪
+
+Teammate 
+Adharsh GM 
