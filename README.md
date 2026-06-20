@@ -1,4 +1,4 @@
-# AI Yoga Posture Evaluator 🧘
+# AI Yoga Posture Evaluator 
 
 A professional AI-powered web application that detects yoga postures using a webcam, evaluates pose accuracy in real-time, and provides intelligent feedback for form correction.
 
